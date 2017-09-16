@@ -1,0 +1,24 @@
+# 请先将解压缩后的“stocks（分行业个股）”文件夹内的所有xlsx格式的表格转换成csv（python中可以使用xlsx2csv进行转换），并将这28个表格以此命名为“stocks1.csv”，“stocks2.csv”...的格式，请不要删除xlsx文件，保留两个格式的文件（也就是说，转换完成后，"stocks（分行业个股）"文件夹中共有56个文件）。然后在R中运行以下脚本。
+
+install.packages("xlsx")
+library(rJava)
+library(xlsxjars)
+library(xlsx)
+setwd("please type the path to where the 'stocks' directory are")
+
+for (i in 1:28){
+        codewtna <- read.csv(paste0("stocks",i,".csv"), nrows = 1)
+        code <- codewtna[,!is.na(codewtna)]
+        cIndex <- 1:13
+        datalist <- list()
+        for (j in 1:length(code)){
+                xlbody <- read.xlsx(paste0("stocks",i,".xlsx"), 
+                                    colIndex = cIndex+14*(j-1), 
+                                    startRow=4, sheetIndex = 1, 
+                                    colClasses = rep("character",13))
+                datalist[[paste0("stocks",i,j)]] <- cbind(code=code[[j]], xlbody)
+        }
+        
+}
+fullData <- ldply(datalist) 
+write.csv(fullData, "fullData.csv")
